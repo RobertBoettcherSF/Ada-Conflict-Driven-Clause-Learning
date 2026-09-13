@@ -1,23 +1,49 @@
 # Conflict-Driven Clause Learning (CDCL) in Ada 2023
 
-Project Overview:
-This repository provides a complete, strongly-typed implementation of the Conflict-Driven Clause Learning (CDCL) algorithm for solving the Boolean Satisfiability (SAT) problem. The CDCL algorithm systematically assigns truth values to variables, uses Boolean Constraint Propagation (BCP) to infer mandatory assignments, builds implication graphs, and analyzes conflicts using the First Unique Implication Point (1UIP) technique to learn new clauses. It features non-chronological backtracking (backjumping) which dramatically prunes the search space compared to classical DPLL.
+## Project Overview
+This repository provides a complete, strongly-typed implementation of the Conflict-Driven Clause Learning (CDCL) algorithm for solving the Boolean Satisfiability (SAT) problem. The CDCL algorithm systematically assigns truth values to variables, uses Boolean Constraint Propagation (BCP) to infer mandatory assignments, builds implication graphs, and analyzes conflicts using the First Unique Implication Point (1UIP) technique to derive learned clauses. Non-chronological backtracking (backjumping) prunes the search space far more effectively than classical DPLL.
 
-Features:
-* Solve_Basic: The core CDCL algorithm utilizing 1UIP conflict analysis and backjumping without modifying learned clause state.
-* Solve_With_Restarts: Variant that periodically restarts the decision tree (resetting back to decision level 0) while keeping all learned clauses, avoiding heavy-tail behavioral bottlenecks.
-* Solve_With_Clause_Deletion: Variant simulating practical memory limits by pruning old learned clauses when the formula outgrows a defined maximum capacity.
-* Full strong typing: Variables, Literals, Clauses, and states leverage Ada's type safety rather than bare integers.
+---
 
-Usage:
-A comprehensive standalone test suite doubles as the executable example (`tests.adb`). To run it:
+## Features
+* `Solve_Basic` — Core CDCL implementation utilizing 1UIP conflict analysis and non-chronological backjumping.
+* `Solve_With_Restarts` — Periodically resets the decision tree to level 0 while retaining learned clauses to avoid heavy-tailed runtimes.
+* `Solve_With_Clause_Deletion` — Prunes learned clauses once capacity exceeds configured bounds to avoid unbounded memory growth.
+* Strong Type Safety — Dedicated types for variables, literals, truth values, and clauses instead of raw integers.
+
+---
+
+## Usage
+Run the comprehensive standalone test suite directly via make:
+
 $ make test
-This will output test results across 15 automated suites. Ensure all assertions result in "PASS". 
-A programmatic example includes defining a `Formula`, populating it via `Add_Clause`, and invoking `Solve_Basic (Formula, Assignment)`. The `Is_Satisfied` function validates output.
 
-Testing:
-The test suite incorporates Functional Correctness (valid SAT/UNSAT detection on small topologies), Edge Cases (empty formulas, trivial assignments), Error Handling (exceptions for literal index out of bounds or literal '0'), and Invariants (structural validity checking via `Is_Satisfied`). This verification and validation ensures robust usage even in boundary situations.
+Expected output verifies every assertion step-by-step and ends with a confirmation that all suites succeeded:
 
-Building:
-Prerequisites: GNAT Compiler supporting Ada 2022/2023 (`-gnat2022` enabled by default in Makefile).
-Run `make all` to build the binary into the `bin/` directory, or `make clean` to remove artifacts. Code complies strictly with zero warnings under `-gnatwa`.
+  PASS — 1.1 Status Satisfiable
+  PASS — 1.2 Validation passes
+  ...
+  === 45 passed, 0 failed ===
+
+To use CDCL in code, initialize a Formula, add clauses, and invoke one of the solver variants:
+* `Init_Formula (F, Vars => 2);`
+* `Add_Clause (F, C);`
+* `Status := Solve_Basic (F, Assignments);`
+* `Valid  := Is_Satisfied (F, Assignments);`
+
+---
+
+## Testing
+The test suite in `tests.adb` covers multiple verification and validation layers:
+* Functional Correctness: Proves correct identification of SAT and UNSAT instances across all algorithm variants.
+* Edge Cases: Exercises formulas with no clauses, single variables, and immediate unit propagations.
+* Error Handling: Confirms that `Bad_Literal` and `Invalid_Formula` exceptions are raised for zero-literals and out-of-range variable IDs.
+* Invariants: Cross-checks all generated assignments against the original formula clauses with `Is_Satisfied`.
+
+---
+
+## Building
+* Prerequisites: GNAT compiler supporting Ada 2022/2023 (`-gnat2022` or `-gnat2023`).
+* Build executable: `make all`
+* Execute test suite: `make test`
+* Clean build tree: `make clean`
