@@ -9,8 +9,8 @@ package body CDCL is
 
    type Assignment_State is array (Variable_Id range <>) of Assignment_Record;
 
-   type CDCL_State (Num_Vars : Natural) is record
-      Assignments    : Assignment_State (1 .. Variable_Id (Num_Vars));
+   type CDCL_State (Num_Vars : Variable_Id) is record
+      Assignments    : Assignment_State (1 .. Num_Vars);
       Trail          : Literal_Vectors.Vector;
       Current_Level  : Natural := 0;
       Clauses        : Clause_Vectors.Vector;
@@ -221,7 +221,7 @@ package body CDCL is
    function All_Assigned (S : CDCL_State) return Boolean is
    begin
       for I in 1 .. S.Num_Vars loop
-         if S.Assignments (Variable_Id (I)).Value = Unassigned then
+         if S.Assignments (I).Value = Unassigned then
             return False;
          end if;
       end loop;
@@ -231,7 +231,7 @@ package body CDCL is
    procedure Decide (S : in out CDCL_State) is
    begin
       for I in 1 .. S.Num_Vars loop
-         if S.Assignments (Variable_Id (I)).Value = Unassigned then
+         if S.Assignments (I).Value = Unassigned then
             S.Current_Level := S.Current_Level + 1;
             Assign (S, -Literal (I), S.Current_Level, 0);
             return;
@@ -241,7 +241,7 @@ package body CDCL is
 
    -- Core Solver Logic incorporating Variants
    function Solve_Internal (F : Formula; Assignments : out Assignment_Array; Use_Restarts : Boolean; Restart_Interval : Positive; Use_Deletion : Boolean; Max_Learned : Positive) return Solve_Status is
-      S : CDCL_State (F.Variables_Count);
+      S : CDCL_State (Variable_Id (F.Variables_Count));
       Conflicts_Since_Restart   : Natural := 0;
       Current_Restart_Threshold : Natural := Restart_Interval;
    begin
