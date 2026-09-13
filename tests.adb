@@ -256,7 +256,7 @@ begin
    Put_Line ("TEST 15 — Complex Manual Evaluation Validation");
    declare
       F : Formula;
-      A : Assignment_Array (1 .. 4) := (True, False, True, False);
+      A : Assignment_Array (1 .. 4) := [True, False, True, False];
    begin
       Init_Formula (F, 4);
       Add_C3 (F, 1, 2, 4);
