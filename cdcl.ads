@@ -12,7 +12,11 @@ package CDCL is
    package Literal_Vectors is new Ada.Containers.Vectors (Positive, Literal);
    subtype Clause is Literal_Vectors.Vector;
 
-   package Clause_Vectors is new Ada.Containers.Vectors (Positive, Clause);
+   package Clause_Vectors is new Ada.Containers.Vectors (
+      Index_Type   => Positive,
+      Element_Type => Clause,
+      "="          => Literal_Vectors."="
+   );
 
    type Formula is record
       Variables_Count : Natural := 0;
